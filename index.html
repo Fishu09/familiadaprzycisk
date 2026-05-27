@@ -2,57 +2,34 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Kto pierwszy?</title>
+<meta name="apple-mobile-web-app-title" content="Kto Pierwszy">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/apple-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+<meta name="theme-color" content="#111">
+<title>Kto Pierwszy?</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
-html, body { width: 100%; height: 100%; overflow: hidden; font-family: -apple-system, 'Helvetica Neue', sans-serif; }
+html, body { width: 100%; height: 100%; overflow: hidden; font-family: -apple-system, 'Helvetica Neue', sans-serif; background: #111; }
 
 body {
     display: flex;
     flex-direction: column;
-    background: #111;
-}
-
-.top-bar {
-    position: fixed;
-    top: 20px;
-    left: 0;
-    right: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 10;
-    height: 60px;
-}
-
-.reset-btn {
-    background: rgba(255,255,255,0.15);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 2px solid rgba(255,255,255,0.3);
-    border-radius: 40px;
-    padding: 12px 40px;
-    font-size: 22px;
-    font-weight: 700;
-    color: #fff;
-    letter-spacing: 2px;
-    cursor: pointer;
-    touch-action: manipulation;
-    transition: all 0.15s;
-}
-
-.reset-btn:active {
-    transform: scale(0.92);
-    background: rgba(255,255,255,0.25);
+    height: 100vh;
+    height: 100dvh;
 }
 
 .game-area {
     display: flex;
+    flex-direction: column;
     width: 100%;
     height: 100vh;
+    height: 100dvh;
 }
 
 .side {
@@ -67,13 +44,8 @@ body {
     position: relative;
 }
 
-.side.left {
-    background: #1a3a5c;
-}
-
-.side.right {
-    background: #5c1a2e;
-}
+.side.top { background: #1a3a5c; }
+.side.bottom { background: #5c1a2e; }
 
 .side .label {
     font-size: 28px;
@@ -97,143 +69,164 @@ body {
     margin-top: 12px;
 }
 
-.side.winner {
-    z-index: 2;
-}
-
-.side.winner .label {
-    color: rgba(255,255,255,0.8);
-}
-
-.side.loser {
-    opacity: 0.5;
-}
-
-.side.loser .result,
-.side.loser .sub {
-    display: none;
-}
+.side.winner { z-index: 2; }
+.side.winner .label { color: rgba(255,255,255,0.8); }
+.side.loser { opacity: 0.35; }
+.side.loser .result, .side.loser .sub { display: none; }
 
 .side .tap-instruction {
     font-size: 36px;
     font-weight: 700;
-    color: rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.12);
     letter-spacing: 2px;
 }
 
-.side.winner .tap-instruction {
-    display: none;
-}
+.side.winner .tap-instruction { display: none; }
+.side.blocked { pointer-events: none; }
 
-.side.blocked {
-    pointer-events: none;
-}
-
-/* confetti-like flash */
-.flash-overlay {
+.reset-wrap {
     position: fixed;
-    inset: 0;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     pointer-events: none;
-    z-index: 5;
-    opacity: 0;
-    transition: opacity 0.1s;
+    z-index: 10;
 }
 
-.flash-overlay.active {
-    opacity: 0.4;
+.reset-btn {
+    pointer-events: all;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: #fff;
+    font-size: 22px;
+    font-weight: 900;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
 }
 
-.flash-overlay.left-flash {
-    background: radial-gradient(circle at 30% 50%, rgba(100,200,255,0.3), transparent 70%);
+.reset-btn:active { transform: scale(0.85); background: rgba(255,255,255,0.25); }
+
+.flash-overlay {
+    position: fixed; inset: 0; pointer-events: none; z-index: 5;
+    opacity: 0; transition: opacity 0.1s;
+}
+.flash-overlay.active { opacity: 0.4; }
+.flash-overlay.top-flash { background: radial-gradient(circle at 50% 30%, rgba(100,200,255,0.3), transparent 70%); }
+.flash-overlay.bottom-flash { background: radial-gradient(circle at 50% 70%, rgba(255,100,150,0.3), transparent 70%); }
+
+@media (orientation: portrait) {
+    .rotate-hint { display: flex !important; }
+    .game-area, .reset-wrap, .flash-overlay { display: none !important; }
 }
 
-.flash-overlay.right-flash {
-    background: radial-gradient(circle at 70% 50%, rgba(255,100,150,0.3), transparent 70%);
+.rotate-hint {
+    display: none;
+    position: fixed; inset: 0; background: #111; z-index: 999;
+    justify-content: center; align-items: center; flex-direction: column;
+    color: #fff; text-align: center; padding: 40px;
 }
 
-@media (prefers-color-scheme: light) {
-    body { background: #e0e0e0; }
-    .side.left { background: #b3d4f7; }
-    .side.right { background: #f7b3c0; }
-    .side .label { color: rgba(0,0,0,0.4); }
-    .side .result { color: #000; }
-    .side .sub { color: rgba(0,0,0,0.5); }
-    .side .tap-instruction { color: rgba(0,0,0,0.12); }
-    .reset-btn { background: rgba(0,0,0,0.08); border-color: rgba(0,0,0,0.2); color: #000; }
-    .reset-btn:active { background: rgba(0,0,0,0.15); }
+.rotate-hint .icon { font-size: 64px; margin-bottom: 24px; animation: rotate-phone 2s ease-in-out infinite; }
+.rotate-hint p { font-size: 20px; opacity: 0.6; font-weight: 500; }
+
+@keyframes rotate-phone {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(90deg); }
 }
 </style>
 </head>
 <body>
 
-<div class="top-bar">
-    <button class="reset-btn" id="resetBtn">↻ RESET</button>
+<div class="rotate-hint">
+    <div class="icon">📱</div>
+    <p>Obróć iPada poziomo</p>
 </div>
 
 <div class="game-area">
-    <div class="side left" id="leftSide">
+    <div class="side top" id="topSide">
         <div class="label">Gracz 1</div>
-        <div class="result" id="leftResult"></div>
-        <div class="sub" id="leftSub"></div>
+        <div class="result" id="topResult"></div>
+        <div class="sub" id="topSub"></div>
         <div class="tap-instruction">TAP</div>
     </div>
-    <div class="side right" id="rightSide">
+    <div class="side bottom" id="bottomSide">
         <div class="label">Gracz 2</div>
-        <div class="result" id="rightResult"></div>
-        <div class="sub" id="rightSub"></div>
+        <div class="result" id="bottomResult"></div>
+        <div class="sub" id="bottomSub"></div>
         <div class="tap-instruction">TAP</div>
     </div>
 </div>
 
-<div class="flash-overlay left-flash" id="leftFlash"></div>
-<div class="flash-overlay right-flash" id="rightFlash"></div>
+<div class="reset-wrap">
+    <button class="reset-btn" id="resetBtn">R</button>
+</div>
+
+<div class="flash-overlay top-flash" id="topFlash"></div>
+<div class="flash-overlay bottom-flash" id="bottomFlash"></div>
 
 <script>
 (function() {
-    const leftSide = document.getElementById('leftSide');
-    const rightSide = document.getElementById('rightSide');
-    const leftResult = document.getElementById('leftResult');
-    const rightResult = document.getElementById('rightResult');
-    const leftSub = document.getElementById('leftSub');
-    const rightSub = document.getElementById('rightSub');
+    // Force landscape
+    try { screen.orientation?.lock('landscape'); } catch(e) {}
+    document.addEventListener('orientationchange', function() {
+        if (screen.orientation?.type?.startsWith?.('portrait')) {
+            try { screen.orientation?.lock('landscape'); } catch(e) {}
+        }
+    });
+
+    const topSide = document.getElementById('topSide');
+    const bottomSide = document.getElementById('bottomSide');
+    const topResult = document.getElementById('topResult');
+    const bottomResult = document.getElementById('bottomResult');
+    const topSub = document.getElementById('topSub');
+    const bottomSub = document.getElementById('bottomSub');
     const resetBtn = document.getElementById('resetBtn');
-    const leftFlash = document.getElementById('leftFlash');
-    const rightFlash = document.getElementById('rightFlash');
+    const topFlash = document.getElementById('topFlash');
+    const bottomFlash = document.getElementById('bottomFlash');
 
     let locked = false;
 
     function reset() {
         locked = false;
-        leftSide.classList.remove('winner', 'loser', 'blocked');
-        rightSide.classList.remove('winner', 'loser', 'blocked');
-        leftResult.textContent = '';
-        rightResult.textContent = '';
-        leftSub.textContent = '';
-        rightSub.textContent = '';
-        leftFlash.classList.remove('active');
-        rightFlash.classList.remove('active');
+        topSide.classList.remove('winner', 'loser', 'blocked');
+        bottomSide.classList.remove('winner', 'loser', 'blocked');
+        topResult.textContent = '';
+        bottomResult.textContent = '';
+        topSub.textContent = '';
+        bottomSub.textContent = '';
+        topFlash.classList.remove('active');
+        bottomFlash.classList.remove('active');
     }
 
     function win(side) {
         if (locked) return;
         locked = true;
 
-        const isLeft = side === 'left';
-        const winnerEl = isLeft ? leftSide : rightSide;
-        const loserEl = isLeft ? rightSide : leftSide;
-        const winnerResult = isLeft ? leftResult : rightResult;
-        const winnerSub = isLeft ? leftSub : rightSub;
-        const flashEl = isLeft ? leftFlash : rightFlash;
+        const isTop = side === 'top';
+        const winnerEl = isTop ? topSide : bottomSide;
+        const loserEl = isTop ? bottomSide : topSide;
+        const winnerResult = isTop ? topResult : bottomResult;
+        const winnerSub = isTop ? topSub : bottomSub;
+        const flashEl = isTop ? topFlash : bottomFlash;
 
-        // Append prefix only if iOS doesn't already have webkit
-        const flash = flashEl;
-        flash.classList.add('active');
-        setTimeout(() => flash.classList.remove('active'), 300);
+        flashEl.classList.add('active');
+        setTimeout(() => flashEl.classList.remove('active'), 300);
 
         winnerEl.classList.add('winner', 'blocked');
         loserEl.classList.add('loser', 'blocked');
 
-        winnerResult.textContent = '🏆';
+        winnerResult.textContent = '\u{1F3C6}';
         winnerSub.textContent = 'WYGRANA!';
     }
 
@@ -242,45 +235,22 @@ body {
         win(side);
     }
 
-    leftSide.addEventListener('click', function(e) {
-        e.preventDefault();
-        handleTap('left');
-    });
+    function attachListeners(el, side) {
+        el.addEventListener('click', function(e) { e.preventDefault(); handleTap(side); });
+        el.addEventListener('touchstart', function(e) { e.preventDefault(); handleTap(side); });
+    }
 
-    leftSide.addEventListener('touchstart', function(e) {
-        e.preventDefault();
-        handleTap('left');
-    });
+    attachListeners(topSide, 'top');
+    attachListeners(bottomSide, 'bottom');
 
-    rightSide.addEventListener('click', function(e) {
-        e.preventDefault();
-        handleTap('right');
-    });
+    resetBtn.addEventListener('click', function(e) { e.preventDefault(); reset(); });
+    resetBtn.addEventListener('touchstart', function(e) { e.preventDefault(); reset(); });
 
-    rightSide.addEventListener('touchstart', function(e) {
-        e.preventDefault();
-        handleTap('right');
-    });
+    document.addEventListener('touchmove', function(e) { e.preventDefault(); }, { passive: false });
 
-    resetBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        reset();
-    });
-
-    resetBtn.addEventListener('touchstart', function(e) {
-        e.preventDefault();
-        reset();
-    });
-
-    // Prevent all default touch behavior
-    document.addEventListener('touchmove', function(e) {
-        e.preventDefault();
-    }, { passive: false });
-
-    // Keyboard support: 1 = left, 2 = right, R = reset
     document.addEventListener('keydown', function(e) {
-        if (e.key === '1' || e.key === 'q') handleTap('left');
-        else if (e.key === '2' || e.key === 'p') handleTap('right');
+        if (e.key === '1' || e.key === 'q') handleTap('top');
+        else if (e.key === '2' || e.key === 'p') handleTap('bottom');
         else if (e.key === 'r' || e.key === 'R') reset();
     });
 })();
